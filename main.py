@@ -1,8 +1,8 @@
 import asyncio
 from db import PostgresRepository
+from adapters import S3Adapter
 from config import Config
 import logging
-import asyncpg
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +15,13 @@ async def x():
                                  Config.DB_PASSWORD,
                                  Config.DB_NAME)
     
-    data = await db_repo.fetch_data()
-    for row in data:
+    data = db_repo.fetch_data()
+    async for row in data:
         print(row)
+    
+    x_upload = S3Adapter(Config.S3_BUCKET_NAME)
+    # Upload to S3
+    await x_upload.upload_file("/home/arun/Projects/resmio-feed-service/requirements.txt", "requirements.txt")
         
 
 if __name__ == "__main__":
