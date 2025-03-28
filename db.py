@@ -1,7 +1,6 @@
 import asyncpg
 import logging
-
-from config import Config
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +12,7 @@ class PostgresRepository:
         self.db_password = db_password
         self.db_name = db_name
 
-
+    @asynccontextmanager
     async def get_connection(self):
         try:
             conn = await asyncpg.connect(host=self.db_host,
@@ -21,19 +20,23 @@ class PostgresRepository:
                                          user=self.db_user,
                                          password=self.db_password,
                                          database=self.db_name)
-            return conn
+            yield conn
         except Exception as e:
             raise
         finally:
-            # await conn.close()
-            pass
+            await conn.close()
+            
 
     async def fetch_data(self):
-        conn = await self.get_connection()
-        async with conn.transaction():
-            try:
-                cursor = await conn.cursor(f"SELECT * FROM dummy")
-                rows = await cursor.fetch(100)                          
-                return rows
-            except Exception as e:
-                raise
+        async with self.get_connection() as conn:
+            async with conn.transaction():
+                try:
+                    cursor = await conn.cursor(f"SELECT * FROM dummy")
+                    while True:
+                        # Fetch the next batch of rows
+                        rows = await cursor.fetch(100)                          
+                        if not rows:
+                            break
+                        yield rows
+                except Exception as e:
+                    raise
