@@ -1,6 +1,7 @@
 import asyncio
 from db import PostgresRepository
 from adapters import S3Adapter
+from service import BatchProcessor
 from config import Config
 import logging
 
@@ -15,13 +16,25 @@ async def x():
                                  Config.DB_PASSWORD,
                                  Config.DB_NAME)
     
-    data = db_repo.fetch_data()
-    async for row in data:
-        print(row)
-    
-    x_upload = S3Adapter(Config.S3_BUCKET_NAME)
-    # Upload to S3
-    await x_upload.upload_file("/home/arun/Projects/resmio-feed-service/requirements.txt", "requirements.txt")
+
+    for batch_num in range(1,10):
+        data = db_repo.fetch_data()
+        # Process data
+        logger.info(f"Processing batch {batch_num}")
+        processor = BatchProcessor()
+        x_upload_file = await processor.write_batch_to_file(data, batch_num)
+
+        # Upload to S3
+        logger.info(f"Uploading batch {batch_num}")
+        x_upload = S3Adapter(Config.S3_BUCKET_NAME)
+        await x_upload.upload_file(x_upload_file, x_upload_file)
+    # # Process data
+    # processor = BatchProcessor()
+    # x_upload_file = await processor.write_batch_to_file(data, 1)
+
+    # # Upload to S3
+    # x_upload = S3Adapter(Config.S3_BUCKET_NAME)
+    # await x_upload.upload_file(x_upload_file, x_upload_file)
         
 
 if __name__ == "__main__":
