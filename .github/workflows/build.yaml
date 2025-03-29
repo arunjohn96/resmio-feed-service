@@ -39,8 +39,8 @@ jobs:
      
       - name: Tag Docker image
         run: |
-          docker tag resmio-feed-service ${{ secrets.RESMIO_ECR_REPO }}:latest
+          docker tag resmio-feed-service ${{ vars.RESMIO_ECR_REPO }}:latest
 
       - name: Push Docker image to AWS ECR
         run: |
-          docker push ${{ secrets.RESMIO_ECR_REPO }}:latest
+          docker push ${{ vars.RESMIO_ECR_REPO }}:latest
