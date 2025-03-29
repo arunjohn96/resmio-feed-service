@@ -37,10 +37,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
      
-      - name: Tag Docker image
+      - name: Push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ vars.RESMIO_ECR_REPO }}
+          IMAGE_TAG: latest
         run: |
-          docker tag resmio-feed-service ${{ vars.RESMIO_ECR_REPO }}:latest
-
-      - name: Push Docker image to AWS ECR
-        run: |
-          docker push ${{ vars.RESMIO_ECR_REPO }}:latest
+          docker tag resmio-feed-service $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
