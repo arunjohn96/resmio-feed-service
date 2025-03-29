@@ -1,3 +1,5 @@
+import asyncio
+import os
 import aioboto3
 import logging
 
@@ -17,7 +19,12 @@ class S3Adapter:
         try:
             async with self.session.client('s3') as s3_client:
                 with open(file_path, 'rb') as f:
-                    await s3_client.upload_fileobj(f,self.bucket_name,key)
+                    # await s3_client.upload_fileobj(f,self.bucket_name,key)
+
+                    # async sleep for 1 seconds
+                    await asyncio.sleep(1)
+            # Remove the local file after upload
+            os.remove(file_path)
             logger.info(f"Uploaded {key} to S3")
             return key
         except Exception as e:

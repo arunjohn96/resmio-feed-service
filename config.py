@@ -14,3 +14,5 @@ class Config:
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_REGION = os.getenv("AWS_REGION")
     S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+    BATCH_SIZE = int(os.getenv("BATCH_SIZE", 1000))
+    FEED_QUERY = os.getenv("FEED_QUERY")

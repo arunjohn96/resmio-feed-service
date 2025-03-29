@@ -27,14 +27,14 @@ class PostgresRepository:
             await conn.close()
             
 
-    async def fetch_data(self):
+    async def fetch_data(self, query, batch_size):
         async with self.get_connection() as conn:
             async with conn.transaction():
                 try:
-                    cursor = await conn.cursor(f"SELECT * FROM dummy")
+                    cursor = await conn.cursor(f"{query}")
                     while True:
                         # Fetch the next batch of rows
-                        rows = await cursor.fetch(100)                          
+                        rows = await cursor.fetch(batch_size)                          
                         if not rows:
                             break
                         yield rows
